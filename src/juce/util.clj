@@ -9,5 +9,7 @@
    {:name "map"       :void-tag? false :predicate-attrs []}
   ])
 
-(doseq [tag-info tags]
-  (j/create-tag-func tag-info))
+;; stop name collision warnings temporarily.
+(binding [*err* (java.io.StringWriter.)]
+  (doseq [tag-info tags]
+    (j/create-tag-func tag-info)))
