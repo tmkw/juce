@@ -121,7 +121,17 @@
   (is (= "42" (render "42"))))
 
 ;; ------------------------------------------------------------
-;; Others
+;; ns-binding tests
+;; ------------------------------------------------------------
+
+(deftest ns-binding-custom-tag
+  ;; juce.util/time を使って HTML が生成できるか
+  (is (= "<div><time datetime=\"2026-01-03\">Jan 3 2026</time>あいうえお</div>"
+         (ns-binding '[juce.util :as u]
+           (render "(div (u/time {:datetime \"2026-01-03\"} \"Jan 3 2026\") \"あいうえお\")")))))
+
+;; ------------------------------------------------------------
+;; file reading test
 ;; ------------------------------------------------------------
 (deftest slurp-file-test
   (let [tmp (java.io.File/createTempFile "juce-test" ".clj")]

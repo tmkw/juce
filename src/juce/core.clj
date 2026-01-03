@@ -3,6 +3,19 @@
     [juce.tags :as t]
     [clojure.java.io :as io]))
 
+(defmacro ns-binding
+  [& requires-and-body]
+  (let [requires (butlast requires-and-body)
+        body     (last requires-and-body)]
+    `(do
+       ;; juce.core に require を追加
+       (binding [*ns* (the-ns 'juce.core)]
+         ~@(for [req requires]
+             `(require ~req)))
+
+       ;; body を juce.core の文脈で評価
+       (binding [*ns* (the-ns 'juce.core)]
+         ~body))))
 
 (defn slurp-file
   [path]
