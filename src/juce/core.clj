@@ -17,9 +17,71 @@
        (binding [*ns* (the-ns 'juce.core)]
          ~body))))
 
-(defn slurp-file
-  [path]
-  (slurp (io/file path)))
+(defn parse-args
+  "属性略記法と従来の map 属性を統合して解析する。
+   戻り値: {:attrs {...} :children [...]}"
+  [args]
+  (loop [xs args
+         attrs {}
+         children []
+         mode :attrs
+         last-nonkw? false]
+    (if (empty? xs)
+      {:attrs attrs :children children}
+      (let [x (first xs)]
+        (cond
+          ;; 属性モード中：キーワードなら次の値とペアにする
+          (and (= mode :attrs) (keyword? x))
+          (let [k x
+                v (second xs)]
+            (recur (nnext xs)
+                   (assoc attrs k v)
+                   children
+                   :attrs
+                   false))
+
+          ;; 属性モード中：map が来たら attrs にマージ
+          (and (= mode :attrs) (map? x))
+          (recur (rest xs)
+                 (merge attrs x)
+                 children
+                 :attrs
+                 false)
+
+          ;; 属性モード中：キーワード以外が来た
+          (= mode :attrs)
+          (if last-nonkw?
+            ;; 2 回連続で非キーワード → children モードへ
+            (recur (rest xs)
+                   attrs
+                   (conj children x)
+                   :children
+                   true)
+            ;; 1 回目の非キーワード → まだ attrs モードだが children 開始の予兆
+            (recur (rest xs)
+                   attrs
+                   (conj children x)
+                   :attrs
+                   true))
+
+          ;; children モード：map が来たら attrs にマージ
+          (and (= mode :children) (map? x))
+          (recur (rest xs)
+                 (merge attrs x)
+                 children
+                 :children
+                 true)
+
+          ;; children モード：その他はすべて children
+          (= mode :children)
+          (recur (rest xs)
+                 attrs
+                 (conj children x)
+                 :children
+                 true)
+
+          :else
+          (recur (rest xs) attrs children mode last-nonkw?))))))
 
 (defn render-attrs [attrs predicate-attrs]
   (apply str
@@ -55,6 +117,26 @@
     :else
       (str node)))
 
+(defn parse-args [args]
+  (loop [xs args attrs {} children [] mode nil]
+    (if (empty? xs)
+      {:attrs attrs :children children}
+      (let [x (first xs)]
+        (cond
+          (and (nil? mode) (keyword? x))
+            (recur xs attrs children :attrs)
+          (and (nil? mode) (not (keyword? x)))
+            (recur xs attrs children :children)
+          (and (= mode :attrs) (keyword? x))
+            (let [k x v (second xs)]
+              (recur (nnext xs) (assoc attrs k v) children :attrs))
+          (and (= mode :attrs) (not (keyword? x)))
+            (recur (rest xs) attrs (conj children x) :children)
+          (and (= mode :children) (map? x))
+          (recur (rest xs) (merge attrs x) children :children)
+          :else
+            (recur (rest xs) attrs (conj children x) :children))))))
+
 (defn create-tag-func [tag-info]
   (let [tag-name (:name tag-info)
         void-tag? (:void-tag? tag-info)
@@ -63,8 +145,7 @@
       `(def
         ~(symbol tag-name)
         (fn [& args#]
-          (let [attrs#     (apply merge (filter map? args#))
-                children#  (remove map? args#)]
+          (let [{attrs# :attrs children# :children} (parse-args args#)]
             (render-node
               {:tag      ~(keyword tag-name)
                :attrs    attrs#
@@ -90,6 +171,9 @@
                        ~form))]
        (render-node result)))))
 
+(defn slurp-file
+  [path]
+  (slurp (io/file path)))
 
 (defn render-file
   "Reads a juce template file and returns the rendered HTML."

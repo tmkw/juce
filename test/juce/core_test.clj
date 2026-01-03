@@ -139,3 +139,53 @@
     (is (= "(div \"abc\")")
          (slurp-file (.getPath tmp)))
     (.delete tmp)))
+
+;; ------------------------------------------------------------
+;; parse-args tests
+;; ------------------------------------------------------------
+
+(deftest parse-args-basic-attrs
+  (is (= {:attrs {:class "abc" :id 123}
+          :children []}
+         (parse-args '(:class "abc" :id 123)))))
+
+(deftest parse-args-attrs-then-child
+  (is (= {:attrs {:class "abc" :id 123}
+          :children ["あいうえお"]}
+         (parse-args '(:class "abc" :id 123 "あいうえお")))))
+
+(deftest parse-args-nonkw-twice-enters-children
+  (is (= {:attrs {:class "abc"}
+          :children ["xyz" "あいうえお"]}
+         (parse-args '(:class "abc" "xyz" "あいうえお")))))
+
+(deftest parse-args-map-merge-in-children-mode
+  (is (= {:attrs {:class "abc" :id 123 :bar "BAR"}
+          :children ["あいうえお" :hoge]}
+         (parse-args '(:class "abc" :id 123 "あいうえお" :hoge {:bar "BAR"})))))
+
+(deftest parse-args-no-keywords-starts-in-children
+  (is (= {:attrs {}
+          :children ["hello" "world"]}
+         (parse-args '("hello" "world")))))
+
+(deftest parse-args-only-map
+  (is (= {:attrs {:x 1}
+          :children []}
+         (parse-args '({:x 1})))))
+
+(deftest parse-args-mixed-map-and-children
+  (is (= {:attrs {:x 1}
+          :children ["A" "B"]}
+         (parse-args '({:x 1} "A" "B")))))
+
+(deftest parse-args-keyword-followed-by-nonkeyword
+  (is (= {:attrs {:foo "bar"}
+          :children ["baz"]}
+         (parse-args '(:foo "bar" "baz")))))
+
+(deftest parse-args-keyword-followed-by-map
+  (is (= {:attrs {:foo {:bar 1}}
+          :children []}
+         (parse-args '(:foo {:bar 1})))))
+
