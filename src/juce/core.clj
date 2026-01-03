@@ -4,6 +4,23 @@
     [clojure.java.io :as io]))
 
 (defmacro ns-binding
+  "Temporarily loads one or more external namespaces into `juce.core` and evaluates the given body in that context.
+
+  Usage:
+    (ns-binding '[my.tags :as t]
+      (render \"(div (t/button \\\"Click\\\"))\"))
+
+  Parameters:
+    requires-and-body - A sequence where all but the last element are `require` forms (vectors),
+                       and the last element is the body expression to evaluate.
+
+  Behavior:
+    - Each require form is evaluated with `*ns*` bound to `juce.core`.
+    - The body is then evaluated in the same namespace.
+    - Useful for making custom tag functions available inside `render`.
+
+  Returns:
+    The result of evaluating the body expression."
   [& requires-and-body]
   (let [requires (butlast requires-and-body)
         body     (last requires-and-body)]
@@ -18,6 +35,8 @@
          ~body))))
 
 (defn render-attrs [attrs predicate-attrs]
+  "Internal helper. Converts an attribute map into an HTML attribute string.
+   Handles boolean attributes listed in `predicate-attrs`."
   (apply str
     (for [[k v] attrs]
       (cond
@@ -32,6 +51,15 @@
           (str " " (name k) "=\"" v "\"")))))
 
 (defn render-node [node]
+  "Internal helper. Recursively renders a juce node into an HTML string.
+
+   Accepts:
+    - string
+    - map {:tag kw :attrs map :children seq :void-tag? bool}
+    - sequential (vector/list of nodes)
+
+  Returns:
+    HTML string."
   (cond
     (string? node)
       node
@@ -52,6 +80,16 @@
       (str node)))
 
 (defn parse-args [args]
+  "Internal helper. Parses tag function arguments.
+
+  Accepts:
+    args - A sequence of:
+      - keyword/value pairs (attribute shorthand)
+      - maps (merged into attributes)
+      - any other values (treated as children)
+
+  Returns:
+    {:attrs map :children vector}"
   (loop [xs args attrs {} children [] mode nil]
     (if (empty? xs)
       {:attrs attrs :children children}
@@ -72,6 +110,7 @@
             (recur (rest xs) attrs (conj children x) :children))))))
 
 (defn create-tag-func [tag-info]
+  "Internal. Generates a tag function such as `div`, `span`, etc."
   (let [tag-name (:name tag-info)
         void-tag? (:void-tag? tag-info)
         predicate-attrs (:predicate-attrs tag-info)]
@@ -94,7 +133,24 @@
 
 
 (defn render
-  "Evaluates a juce template string with an optional environment map and returns the rendered HTML."
+  "Evaluates a juce template string and returns the rendered HTML.
+
+   Usage:
+     (render \"(div :class \\\"x\\\" \\\"Hello\\\")\")
+     (render \"(p (:name user))\" {:user {:name \"Alice\"}})
+
+   Parameters:
+     s   - String containing a juce DSL expression.
+     env - Optional map. Keys become local symbols inside the template.
+
+   Behavior:
+     - The template string is read as a Clojure form.
+     - `env` bindings are injected as locals.
+     - The form is evaluated in the `juce.core` namespace.
+     - The result is converted to HTML via `render-node`.
+
+   Returns:
+     HTML string."
   ([s]
    (render s {}))
   ([s env]
@@ -106,11 +162,23 @@
        (render-node result)))))
 
 (defn slurp-file
+  "Internal. Reads a file from disk and returns its contents as a string."
   [path]
   (slurp (io/file path)))
 
 (defn render-file
-  "Reads a juce template file and returns the rendered HTML."
+  "Reads a juce template file and returns the rendered HTML.
+
+   Usage:
+     (render-file \"template.juce\")
+     (render-file \"template.juce\" {:name \"Alice\"})
+
+   Parameters:
+     path - Path to a file containing a juce DSL expression.
+     env  - Optional map of local bindings.
+
+   Returns:
+     HTML string."
   ([path]
     (render (slurp-file path) {}))
   ([path env]
