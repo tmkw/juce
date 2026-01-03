@@ -1,31 +1,35 @@
 # juce
 [![Clojars Project](https://img.shields.io/clojars/v/io.github.tmkw/juce.svg)](https://clojars.org/io.github.tmkw/juce)
+
 HTML DSL for Clojure programmers. It looks like Just Clojure Expression.
 
 ## Overview
 juce is a domain-specific language (DSL) for generating HTML using pure Clojure expressions.
+In fact, juce provides helper functions for generating HTML, so it is both DSL and Clojure expression at the same time.
 
 ## Prerequisites
 Java and Clojure must be installed.
 
 ## Usage
-### As a library
+
+### Using as a library
 Add juce as a dependency in your `deps.edn`:
 ```
-{:deps {io.github.tmkw/juce {:mvn/version "0.1.0"}}}
+{:deps {io.github.tmkw/juce {:mvn/version "0.2.0"}}}
 ```
-
-Then use it in your code:
+Then use it in your code.
 ```clojure
 (require '[juce.core :refer [div span]])
 (div {:class "greeting"} (span "Hello, world!"))
 ```
-This expression returns:
+Both `div` and `span` are functions that return HTML tag expressions.
+So the above expression results in:
 ```html
 <div class="greeting"><span>Hello, world!</span></div>
 ```
 
-You can mix Clojure expressions seamlessly:
+#### Mixing Clojure expressions
+You can mix Clojure expressions seamlessly.
 ```clojure
 (let [name "hoge"]
   (div
@@ -34,60 +38,80 @@ You can mix Clojure expressions seamlessly:
         "Hello, world!"
         (str "Hello, " name)))))
 ```
-returns:
+This produces:
 ```html
 <div><span>Hello, hoge</span></div>
 ```
 
+Here is another example.
 ```clojure
 (require '[juce.core :refer [div p]])
-
 (let [people [{:name "John" :phone "xxx-xxxxx"}
               {:name "Tom"  :phone "yyy-yyyyy"}]]
   (div
     (for [person people]
       (p (str (:name person) " " (:phone person))))))
 ```
-returns:
+This produces:
 ```html
 <div><p>John xxx-xxxxx</p><p>Tom yyy-yyyyy</p></div>
 ```
 
-If you want to render juce DSL expression from a string, you can use `render` function:
+#### Render functions
+If you want to render juce DSL expression from a string, you can use `render` function.
 ```clojure
 (require '[juce.core :as j])
-
 (j/render "(div {:class \"abc\" :id \"123\"} (p \"yey!\"))")
 ```
-This expression returns:
+This produces:
 ```html
 <div class="abc" id="123"><p>yey!</p></div>
 ```
 
-If you want to render juce DSL expression from a file, `render-file` is available:
+If you want to render juce DSL expression from a file, `render-file` is available.
 ```clojure
 (require '[juce.core :as j])
-
 (j/render-file "path/to/file")
 ```
 
 #### Rendering with context data
 Both `render` and `render-file` accept context data as the second argument.
-
 For example:
 ```clojure
 (require '[juce.core :as j])
-
 (j/render
   "(section {:id \"x\"} (p (:name hoge)))"
   {:hoge {:name "ほげ"}})
 ```
-retuns:
+This produces:
 ```html
 <section id="x"><p>ほげ</p></section>
 ```
 
-### As a CLI
+#### Attribute shorthand syntax
+Starting from juce 0.2.0, attributes can be written directly after the tag name using keyword/value pairs:
+```clojure
+(div :class "greeting" :id 123 "Hello")
+```
+This is equivalent to:
+```clojure
+(div {:class "greeting" :id 123} "Hello")
+```
+Once a non-keyword argument appears twice in a row, the rest of the arguments are treated as normal child elements.
+
+#### External namespace loading (`ns-binding`)
+juce 0.2.0 introduces `ns-binding`, a macro that temporarily loads external namespaces into `juce.core` so that custom tag functions can be used inside `render`.
+
+For example:
+```clojure
+(require '[juce.core :as j])
+(j/ns-binding '[my.custom.tags :as t]
+  (j/render "(div (t/button \"Click me\"))"))
+```
+`ns-binding` temporarily loads the namespace `my.custom.tags` into `juce.core` with alias `t`,
+so aliases such as `t/button` can be resolved inside `render`.
+
+### Using juce as a CLI
 1. `git clone` this repository.
 2. clojure -T:build jar
 3. target/juce-x.x.x.jar is generated.
@@ -99,12 +123,12 @@ $ chmod +x juce
 ```
 Then, you can use 'juce' command. For example:
 ```shell
-$ CLASSPATH="./target/juce-0.1.0.jar" ./juce -e '(div "abcdefg")'
+$ CLASSPATH="./target/juce-0.2.0.jar" ./juce -e '(div "abcdefg")'
 <div>abcdefg</div>
 ```
 If you add `juce` command to the PATH, `./` doesn't need
 ```shell
-$ CLASSPATH="./target/juce-0.1.0.jar" juce -e '(div "abcdefg")'
+$ CLASSPATH="./target/juce-0.2.0.jar" juce -e '(div "abcdefg")'
 ```
 
 ### Note
@@ -125,6 +149,7 @@ $ CLASSPATH="./target/juce-0.1.0.jar" juce -e '(div "abcdefg")'
   - time
   - source
   - map
+
 It is recommended to use them with a namespace qualifier.
 ```clojure
 (require '[juce.core :as j :refer [div p]]
@@ -133,6 +158,7 @@ It is recommended to use them with a namespace qualifier.
   (p "abcde")
   (u/time {:datetime "2026-01-02"} "1 Jan 2026"))
 ```
+
 
 ## License
 juce is distributed under the BSD 2-Clause "Simplified" License (SPDX: BSD-2-Clause).
