@@ -3,7 +3,8 @@
             [deps-deploy.deps-deploy :as dd]))
 
 (def lib 'io.github.tmkw/juce)
-(def version "0.2.0")
+(def version (clojure.string/trim (slurp "VERSION")))
+
 
 (def class-dir "target/classes")
 (def jar-file (format "target/%s-%s.jar" (name lib) version))
@@ -45,4 +46,17 @@
               :pom-file (b/pom-path {:class-dir class-dir
                                      :lib lib
                                      :version version})}))
+(defn cli [_]
+  (let [bin-dir "bin"
+        script (str bin-dir "/juce")
+        content (format "clojure -Sdeps '{:deps {io.github.tmkw/juce {:mvn/version \"%s\"}}}' -M:cli \"$@\"" version)]
+    (.mkdirs (java.io.File. bin-dir))
+    (spit script content)
+    (println "CLI script generated at:" script)))
+
+(defn release [_]
+  (deploy nil)
+  (cli nil)
+  (println "Release completed for version" version))
+
 
