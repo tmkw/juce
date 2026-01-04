@@ -1,10 +1,25 @@
-require "open3"
+require "erb"
 
 VERSION_FILE = "VERSION"
+README_TEMPLATE = "docs/README.md.erb"
+README_OUTPUT = "README.md"
+
+def current_version
+  File.read(VERSION_FILE).strip
+end
+
+desc "Generate README.md from ERB template"
+task :doc do
+  version = current_version
+  template = ERB.new(File.read(README_TEMPLATE), trim_mode: "-")
+  result = template.result_with_hash(version: version)
+
+  File.write(README_OUTPUT, result)
+  puts "Generated #{README_OUTPUT} with version #{version}"
+end
 
 desc "Release if VERSION has changed"
-task :release do
-  # 1. VERSION に変更があるか確認
+task :release  => :doc do
   changed = `git diff --name-only HEAD #{VERSION_FILE}`.strip
 
   if changed.empty?
@@ -12,10 +27,10 @@ task :release do
     next
   end
 
-  version = File.read(VERSION_FILE).strip
+  version = current_version
+
   puts "Releasing version #{version}..."
 
-  # 2. clojure -T:build release を実行
   system("clojure -T:build release") or abort("Release failed")
 
   puts "Release completed."

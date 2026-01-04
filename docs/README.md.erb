@@ -13,7 +13,7 @@ Java and Clojure must be installed.
 ## Usage
 Add juce as a dependency in your `deps.edn`:
 ```
-{:deps {io.github.tmkw/juce {:mvn/version "0.2.1"}}}
+{:deps {io.github.tmkw/juce {:mvn/version "<%= version -%>"}}}
 ```
 Then use it in your code.
 ```clojure
@@ -212,12 +212,12 @@ $ chmod +x juce
 ```
 Then, you can use 'juce' command. For example:
 ```shell
-$ CLASSPATH="./target/juce-0.2.1.jar" ./juce -e '(div "abcdefg")'
+$ CLASSPATH="./target/juce-<%= version -%>.jar" ./juce -e '(div "abcdefg")'
 <div>abcdefg</div>
 ```
 If you add `juce` command to the PATH, `./` doesn't need
 ```shell
-$ CLASSPATH="./target/juce-0.2.1.jar" juce -e '(div "abcdefg")'
+$ CLASSPATH="./target/juce-<%= version -%>.jar" juce -e '(div "abcdefg")'
 ```
 
 ## License
