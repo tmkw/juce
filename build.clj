@@ -12,8 +12,15 @@
 (defn clean [_]
   (b/delete {:path "target"}))
 
+(defn var_version [_]
+  (let [version-ns-path "src/juce/version.clj"
+        content (format "(ns juce.version)\n(def version \"%s\")\n" version)]
+    (spit version-ns-path content)
+    (println "Generated" version-ns-path)))
+
 (defn jar [_]
   (clean nil)
+  (var_version nil)
   (let [basis (b/create-basis {})]
     (b/write-pom
       {:class-dir class-dir
@@ -46,10 +53,11 @@
               :pom-file (b/pom-path {:class-dir class-dir
                                      :lib lib
                                      :version version})}))
+
 (defn cli [_]
   (let [bin-dir "bin"
         script (str bin-dir "/juce")
-        content (format "clojure -Sdeps '{:deps {io.github.tmkw/juce {:mvn/version \"%s\"}}}' -M:cli \"$@\"" version)]
+        content (format "clojure -Sdeps '{:deps {io.github.tmkw/juce {:mvn/version \"%s\"}}}' -M -m juce.cli \"$@\"\n" version)]
     (.mkdirs (java.io.File. bin-dir))
     (spit script content)
     (println "CLI script generated at:" script)))

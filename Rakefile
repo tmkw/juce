@@ -19,7 +19,7 @@ task :doc do
 end
 
 desc "Release if VERSION has changed"
-task :release  => :doc do
+task :release do
   changed = `git diff --name-only HEAD #{VERSION_FILE}`.strip
 
   if changed.empty?
@@ -34,5 +34,7 @@ task :release  => :doc do
   system("clojure -T:build release") or abort("Release failed")
 
   puts "Release completed."
+
+  Rake::Task[:doc].invoke
 end
 
