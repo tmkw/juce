@@ -6,6 +6,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-01-04
+### Added
+- Added a command line tool named `juce` in `bin` directory.
+- Added `juce.version` namespace, automatically generated during the build process.
+  This allows users to check the library version directly from the REPL:
+  ```clojure
+  (require 'juce.version)
+  juce.version/version
+  ```
+
+
+## [0.2.1] - 2026-01-03
+### Changed
+- No functional changes; this release focuses solely on documentation quality and internal clarity.
+
 ## [0.2.0] - 2026-01-03
 ### Added
 - Added `ns-binding` macro for loading external namespaces into `juce.core` with alias support.
