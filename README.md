@@ -1,7 +1,7 @@
 # juce
 [![Clojars Project](https://img.shields.io/clojars/v/io.github.tmkw/juce.svg)](https://clojars.org/io.github.tmkw/juce)
 
-HTML DSL for Clojure programmers. It looks like Just Clojure Expression.
+HTML DSL library for Clojure. It looks like "Just Clojure Expression".
 
 ## Overview
 juce is a domain‑specific language (DSL) for generating HTML using pure Clojure expressions.
@@ -24,6 +24,14 @@ Both `div` and `span` are functions that return HTML tag expressions.
 So the above expression results in:
 ```html
 <div class="greeting"><span>Hello, world!</span></div>
+```
+Trying this in the REPL gives:
+```shell
+$ clj
+user=> (require '[juce.core :refer [div span]])
+nil
+user=> (div {:class "greeting"} (span "Hello, world!"))
+"<div class=\"greeting\"><span>Hello, world!</span></div>"
 ```
 
 #### Mixing Clojure expressions
