@@ -1,1 +1,1 @@
-clojure -Sdeps '{:deps {io.github.tmkw/juce {:mvn/version "0.2.1"}}}' -M:cli "$@"
+clojure -Sdeps '{:deps {io.github.tmkw/juce {:mvn/version "0.2.2-SNAPSHOT"}}}' -M -m juce.cli "$@"
