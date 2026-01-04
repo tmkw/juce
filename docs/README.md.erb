@@ -1,30 +1,21 @@
 # juce
+
 [![Clojars Project](https://img.shields.io/clojars/v/io.github.tmkw/juce.svg)](https://clojars.org/io.github.tmkw/juce)
 
 HTML DSL library for Clojure.
 It looks like **Just Clojure Expression**.
 
+---
+
 ## 1. Prerequisites
 Java and Clojure must be installed.
 
+Clojure installation guide: https://clojure.org/guides/install_clojure
+
 ## 2. Using juce as a command line tool (CLI)
-juce provides a command‑line tool that lets you evaluate juce expressions instantly.
+`juce-cli` is available.
 
-### Install
-1. download the `juce` command file
-2. make it executable:
-```shell
-$ curl -O https://raw.githubusercontent.com/tmkw/juce/main/bin/juce
-$ chmod +x juce
-```
-Then move the `juce` command to a directory included in your `PATH`.
-
-### How to use
-After installation, you can run juce directly.
-```shell
-$ juce -e '(div "Hello!")'
-<div>Hello!</div>
-```
+https://github.com/tmkw/juce-cli
 
 ## 3. DSL basics
 
@@ -170,7 +161,7 @@ so aliases such as `t/button` can be resolved inside `render`.
 #### 1. juce doesn't format HTML.
 Output is compact. Use an external formatter if needed.
 
-### 2. Avoid `doseq`
+#### 2. Avoid `doseq`
 `doseq` returns `nil`, so it produces no HTML. Use `for` instead.
 ```clojure
 (require '[juce.core :as j])
@@ -200,6 +191,10 @@ It is recommended to use them with a namespace qualifier to avoid name collision
 ```
 
 ## License
-juce is distributed under the BSD 2-Clause "Simplified" License (SPDX: BSD-2-Clause).
+juce is distributed under the BSD 2-Clause License (SPDX: BSD-2-Clause).
 See the LICENSE file for details.
 
+## Author
+Takanobu Maekawa
+
+https://github.com/tmkw
