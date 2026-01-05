@@ -15,7 +15,7 @@ Usage:
 
 Options:
   -e, --expr EXPR        Evaluate EXPR instead of reading from stdin
-  -E, --env  ENV         Provide EDN environment map for variable bindings
+  -E, --env  ENV         Provide a map for variable bindings (Clojure map syntax)
   -r, --require NS[/ALIAS]
                          Require namespace NS, optionally with ALIAS
   -h, --help             Show this help message")
@@ -37,40 +37,35 @@ Options:
          env {}
          requires []]
     (if (empty? args)
-      ;; 実行フェーズ
+      ;; exec DSL
       (do
+        ;; namespace setting
         (binding [*ns* (the-ns 'juce.core)]
           (doseq [req requires]
             (let [[nm alias-name] (parse-require req)]
               (require nm)
               (when alias-name
                 (alias alias-name nm)))))
-
-        ;; DSL を評価
+        ;; evaluate DSL
         (let [input (or expr (read-stdin))]
           (when-not (str/blank? input)
             (println (core/render input env)))
           (flush)))
-
-      ;; パースフェーズ
+      ;; parse arguments
       (let [[opt val & rest] args]
         (cond
           ;; help
           (or (= opt "-h") (= opt "--help"))
           (do (println help-text) (flush))
-
           ;; expr
           (or (= opt "-e") (= opt "--expr"))
           (recur rest val env requires)
-
           ;; env
           (or (= opt "-E") (= opt "--env"))
           (recur rest expr (edn/read-string val) requires)
-
           ;; require
           (or (= opt "-r") (= opt "--require"))
           (recur rest expr env (conj requires val))
-
           ;; unknown
           :else
           (do
