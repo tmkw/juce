@@ -53,18 +53,8 @@
               :pom-file (b/pom-path {:class-dir class-dir
                                      :lib lib
                                      :version version})}))
-
-(defn cli [_]
-  (let [bin-dir "bin"
-        script (str bin-dir "/juce")
-        content (format "clojure -Sdeps '{:deps {io.github.tmkw/juce {:mvn/version \"%s\"}}}' -M -m juce.cli \"$@\"\n" version)]
-    (.mkdirs (java.io.File. bin-dir))
-    (spit script content)
-    (println "CLI script generated at:" script)))
-
 (defn release [_]
   (deploy nil)
-  (cli nil)
   (println "Release completed for version" version))
 
 
