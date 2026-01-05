@@ -17,8 +17,13 @@ Options:
   -e, --expr EXPR        Evaluate EXPR instead of reading from stdin
   -E, --env  ENV         Provide a map for variable bindings (Clojure map syntax)
   -r, --require NS[/ALIAS]
-                         Require namespace NS, optionally with ALIAS
-  -h, --help             Show this help message")
+                         Require namespace NS, optionally with ALIAS.
+                         This option can be repeated. (ex. --require my.tag/m --require my.tag2/m2)
+  -h, --help             Show this help message
+
+Note:
+  External tag libraries must be available on the classpath.
+  (e.g. CLASSPATH=\"lib.jar\" juce --require my.tags/t ...)")
 
 (defn read-stdin []
   (slurp *in*))
