@@ -11,10 +11,12 @@
 Usage:
   echo '(div \"hello\")' | juce
   juce -e '(div \"hello\")'
+  juce -f template.juce
   juce -e '(m/hoge \"あいうえお\")' --require my.custom.tags/m
 
 Options:
   -e, --expr EXPR        Evaluate EXPR instead of reading from stdin
+  -f, --file FILE        Read juce DSL from FILE
   -E, --env  ENV         Provide a map for variable bindings (Clojure map syntax)
   -r, --require NS[/ALIAS]
                          Require namespace NS, optionally with ALIAS.
@@ -39,6 +41,7 @@ Note:
   [& args]
   (loop [args args
          expr nil
+         file nil
          env {}
          requires []]
     (if (empty? args)
@@ -51,26 +54,39 @@ Note:
               (require nm)
               (when alias-name
                 (alias alias-name nm)))))
+
         ;; evaluate DSL
-        (let [input (or expr (read-stdin))]
+        (let [input (cond
+                      expr expr
+                      file (slurp file)
+                      :else (read-stdin))]
           (when-not (str/blank? input)
             (println (core/render input env)))
           (flush)))
+
       ;; parse arguments
       (let [[opt val & rest] args]
         (cond
           ;; help
           (or (= opt "-h") (= opt "--help"))
           (do (println help-text) (flush))
+
           ;; expr
           (or (= opt "-e") (= opt "--expr"))
-          (recur rest val env requires)
+          (recur rest val file env requires)
+
+          ;; file
+          (or (= opt "-f") (= opt "--file"))
+          (recur rest expr val env requires)
+
           ;; env
           (or (= opt "-E") (= opt "--env"))
-          (recur rest expr (edn/read-string val) requires)
+          (recur rest expr file (edn/read-string val) requires)
+
           ;; require
           (or (= opt "-r") (= opt "--require"))
-          (recur rest expr env (conj requires val))
+          (recur rest expr file env (conj requires val))
+
           ;; unknown
           :else
           (do

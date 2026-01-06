@@ -18,6 +18,11 @@ task :doc do
   puts "Generated #{README_OUTPUT} with version #{version}"
 end
 
+desc "Run Clojure tests"
+task :test do
+  sh "clojure -M:test"
+end
+
 desc "Release if VERSION has changed"
 task :release do
   changed = `git diff --name-only HEAD #{VERSION_FILE}`.strip
