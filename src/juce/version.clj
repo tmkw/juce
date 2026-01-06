@@ -1,2 +1,2 @@
 (ns juce.version)
-(def version "0.2.3")
+(def version "0.2.4")

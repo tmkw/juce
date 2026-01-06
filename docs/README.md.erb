@@ -20,39 +20,63 @@ https://github.com/tmkw/juce-cli
 ## 3. DSL basics
 
 ### Basic usage
+
 ```clojure
 (div {:class "greeting"} (span "Hello, world!"))
 ```
+
 Output:
 ```html
 <div class="greeting"><span>Hello, world!</span></div>
 ```
+
 The notation `{ .... }` represents an attribute map.
 
 You cannot omit quotation marks as shown below, because juce follows standard Clojure syntax.
+
 ```clojure
 (div {:class greeting} (span Hello, world!))
 ;; => error
 ```
 
+juce doesn't provide DSL expression for HTML comment.
+If you want to include an HTML comment, write it directly as a string:
+
+```clojure
+(html
+    (div
+      "<!--
+         This is a comment.
+       -->"
+       (button "Push Me")))
+```
+
 ### Attribute shorthand
+
 Attributes can be written directly after the tag name using keyword/value pairs.
+
 ```clojure
 (div :class "greeting" :id 123 "Hello")
 ```
+
 The example above is equivalent to:
+
 ```clojure
 (div {:class "greeting" :id 123} "Hello")
 ```
+
 Attribute shorthand is parsed only while arguments form keyword/value pairs.
 
 ### Mixing Clojure expressions
+
 ```clojure
 (div
   (for [name ["foo" "bar"]]
     (span (str "Hello, " name))))
 ```
+
 Output:
+
 ```html
 <div><span>Hello, foo</span><span>Hello, bar</span></div>
 ```
@@ -60,15 +84,18 @@ Output:
 ## 4. Using juce as a library
 
 Add juce to your `deps.edn`:
+
 ```
 {:deps {io.github.tmkw/juce {:mvn/version "<%= version %>"}}}
 ```
 
 ### Overview
+
 juce is a domain‑specific language (DSL) for generating HTML using pure Clojure expressions.
 It provides helper functions for building HTML, so it works both as a DSL and as regular Clojure code.
 
 ### Rendering with functions
+
 ```clojure
 (require '[juce.core :refer [div span]])
 
@@ -77,6 +104,7 @@ It provides helper functions for building HTML, so it works both as a DSL and as
 ```
 
 ### Rendering from a string
+
 ```clojure
 (require '[juce.core :as j])
 
@@ -85,21 +113,25 @@ It provides helper functions for building HTML, so it works both as a DSL and as
 ```
 
 ### Rendering from a file
+
 ```clojure
 (j/render-file "path/to/file")
 ```
 
 ### Rendering with context
+
 ```clojure
 (j/render "(section (p (:name hoge)))" {:hoge {:name "HOGE"}})
 ;;=> <section><p>HOGE</p></section>
 ```
 
 ## Custom tags
+
 juce’s built‑in tags (div, span, p, …) are ordinary Clojure functions.
 You can define your own tags the same way.
 
 ### Rules for custom tags
+
 - Define a Clojure function whose name represents the tag or component you want to create.
   Examples: `button`, `card`, `hero-section`, etc.
 
@@ -119,15 +151,19 @@ You can define your own tags the same way.
   (j/div :class "my-button"
     (j/span label)))
 ```
+
 You can also implement custom tags without using juce at all.
 The following example is equivalent to the above one.
+
 ```clojure
 (ns my.custom.tags)
 
 (defn button [label]
   (str "<div class=\"my-button\"><span>" label "</span></div>"))
 ```
+
 Both versions work as expected:
+
 ```clojure
 (require '[my.custom.tags :as m] '[juce.core :as j :refer [section]])
 
@@ -137,7 +173,9 @@ Both versions work as expected:
 (section (m/button "Hi!"))
 ;; => <section><div class="my-button"><span>Hi!</span></div></section>
 ```
+
 Custom tags can also be used inside `render` and `render-file`.
+
 ```clojure
 (require '[juce.core :as j])
 
@@ -147,6 +185,7 @@ Custom tags can also be used inside `render` and `render-file`.
 ```
 
 #### External namespace loading (`ns-binding`)
+
 `ns-binding`, a macro that temporarily loads external namespaces into `juce.core` so that custom tag functions can be used inside `render`.
 
 ```clojure
@@ -154,15 +193,20 @@ Custom tags can also be used inside `render` and `render-file`.
 (j/ns-binding '[my.custom.tags :as t]
   (j/render "(div (t/button \"Click me\"))"))
 ```
+
 `ns-binding` temporarily loads the namespace `my.custom.tags` into `juce.core` with alias `t`,
 so aliases such as `t/button` can be resolved inside `render`.
 
 ### Notes & best practices
+
 #### 1. juce doesn't format HTML.
+
 Output is compact. Use an external formatter if needed.
 
 #### 2. Avoid `doseq`
+
 `doseq` returns `nil`, so it produces no HTML. Use `for` instead.
+
 ```clojure
 (require '[juce.core :as j])
 
@@ -175,13 +219,16 @@ Output is compact. Use an external formatter if needed.
 ```
 
 #### 3. Some HTML tags conflict with Clojure core
+
 Use them from the `juce.util` namespace.
+
 - meta
 - time
 - source
 - map
 
 It is recommended to use them with a namespace qualifier to avoid name collisions.
+
 ```clojure
 (require '[juce.core :as j :refer [div p]]
          '[juce.util :as u])
@@ -191,10 +238,12 @@ It is recommended to use them with a namespace qualifier to avoid name collision
 ```
 
 ## License
+
 juce is distributed under the BSD 2-Clause License (SPDX: BSD-2-Clause).
 See the LICENSE file for details.
 
 ## Author
+
 Takanobu Maekawa
 
 https://github.com/tmkw

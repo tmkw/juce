@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.4] - 2026-01-07
+### Added
+- Added `-f` / `--file` option to the CLI, allowing users to render juce DSL expressions from a file.
+
 ## [0.2.3] - 2026-01-05
 ### Removed
 - Removed the `juce` command-line script from the `bin` directory.
