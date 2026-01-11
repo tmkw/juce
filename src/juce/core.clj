@@ -140,8 +140,10 @@
      (render \"(p (:name user))\" {:user {:name \"Alice\"}})
 
    Parameters:
-     s   - String containing a juce DSL expression.
-     env - Optional map. Keys become local symbols inside the template.
+     s    - String containing a juce DSL expression.
+     env  - Optional map. Keys become local symbols inside the template.
+     opts - other options.
+              doctype: (true/false) use DOCTYPE declaration. Default is false.
 
    Behavior:
      - The template string is read as a Clojure form.
@@ -152,14 +154,19 @@
    Returns:
      HTML string."
   ([s]
-   (render s {}))
+   (render s {} {}))
   ([s env]
+   (render s env {}))
+  ([s env opts]
    (binding [*ns* (the-ns 'juce.core)]
-     (let [form   (read-string s)
+     (let [doctype "<!DOCTYPE html>"
+           form   (read-string s)
            result (eval
                     `(let [~@(mapcat (fn [[k v]] [(symbol (name k)) v]) env)]
                        ~form))]
-       (render-node result)))))
+       (if (= (:doctype opts) true)
+         (str doctype (render-node result))
+         (render-node result))))))
 
 (defn slurp-file
   "Internal. Reads a file from disk and returns its contents as a string."
