@@ -96,7 +96,7 @@ Output:
 Add juce to your `deps.edn`:
 
 ```
-{:deps {io.github.tmkw/juce {:mvn/version "0.2.4"}}}
+{:deps {io.github.tmkw/juce {:mvn/version "0.2.5"}}}
 ```
 
 ### Overview
