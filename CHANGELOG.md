@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.5] - 2026-01-11
+### Added
+- Added doctype options to the render function
+- Added `-D` / `--doctype` option to the CLI, allowing users to specify if DOCTYPE is needed or not.
+
 ## [0.2.4] - 2026-01-07
 ### Added
 - Added `-f` / `--file` option to the CLI, allowing users to render juce DSL expressions from a file.
