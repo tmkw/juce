@@ -2,22 +2,28 @@
 
 [![Clojars Project](https://img.shields.io/clojars/v/io.github.tmkw/juce.svg)](https://clojars.org/io.github.tmkw/juce)
 
-HTML DSL library for Clojure.
-It looks like **Just Clojure Expression**.
+A small Clojure library for generating HTML using plain Clojure expressions.
+It is intended for static site or page generation, and is not suitable as a dynamic web page renderer.
 
 ---
 
 ## 1. Prerequisites
+
 Java and Clojure must be installed.
 
 Clojure installation guide: https://clojure.org/guides/install_clojure
 
+---
+
 ## 2. Using juce as a command line tool (CLI)
-`juce-cli` is available.
+
+A separate CLI tool, `juce-cli`, is also available.
 
 https://github.com/tmkw/juce-cli
 
-## 3. DSL basics
+---
+
+## 3. DSL Basics
 
 ### Basic usage
 
@@ -26,6 +32,8 @@ https://github.com/tmkw/juce-cli
 ```
 
 Output:
+
+
 ```html
 <div class="greeting"><span>Hello, world!</span></div>
 ```
@@ -65,7 +73,7 @@ The example above is equivalent to:
 (div {:class "greeting" :id 123} "Hello")
 ```
 
-Attribute shorthand is parsed only while arguments form keyword/value pairs.
+Attribute shorthand works only while arguments appear as keyword/value pairs.
 
 ### Mixing Clojure expressions
 
@@ -81,6 +89,8 @@ Output:
 <div><span>Hello, foo</span><span>Hello, bar</span></div>
 ```
 
+---
+
 ## 4. Using juce as a library
 
 Add juce to your `deps.edn`:
@@ -91,8 +101,7 @@ Add juce to your `deps.edn`:
 
 ### Overview
 
-juce is a domain‑specific language (DSL) for generating HTML using pure Clojure expressions.
-It provides helper functions for building HTML, so it works both as a DSL and as regular Clojure code.
+juce provides helper functions for building HTML, so it works as a DSL as well as regular Clojure code.
 
 ### Rendering with functions
 
@@ -127,7 +136,7 @@ It provides helper functions for building HTML, so it works both as a DSL and as
 
 ## Custom tags
 
-juce’s built‑in tags (div, span, p, …) are ordinary Clojure functions.
+juce’s built‑in tags (div, span, p, …) are ordinary Clojure functions that return HTML strings.
 You can define your own tags the same way.
 
 ### Rules for custom tags
@@ -237,12 +246,24 @@ It is recommended to use them with a namespace qualifier to avoid name collision
   (u/time {:datetime "2026-01-02"} "1 Jan 2026"))
 ```
 
-## License
+---
+
+## 4. Intended Use / Safety Notes
+
+juce evaluates Clojure expressions directly.
+Use it with trusted, developer-authored templates such as static site content.
+It is not intended for rendering untrusted input in web applications.
+
+---
+
+## 5. License
 
 juce is distributed under the BSD 2-Clause License (SPDX: BSD-2-Clause).
 See the LICENSE file for details.
 
-## Author
+---
+
+## 6. Author
 
 Takanobu Maekawa
 
