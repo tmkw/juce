@@ -21,6 +21,7 @@ Options:
   -r, --require NS[/ALIAS]
                          Require namespace NS, optionally with ALIAS.
                          This option can be repeated. (ex. --require my.tag/m --require my.tag2/m2)
+  -D  --doctype          use DOCTYPE declaration (ex. --doctype html) only html is available.
   -h, --help             Show this help message
 
 Note:
@@ -43,6 +44,7 @@ Note:
          expr nil
          file nil
          env {}
+         opts {}
          requires []]
     (if (empty? args)
       ;; exec DSL
@@ -61,7 +63,7 @@ Note:
                       file (slurp file)
                       :else (read-stdin))]
           (when-not (str/blank? input)
-            (println (core/render input env)))
+            (println (core/render input env opts)))
           (flush)))
 
       ;; parse arguments
@@ -73,19 +75,23 @@ Note:
 
           ;; expr
           (or (= opt "-e") (= opt "--expr"))
-          (recur rest val file env requires)
+          (recur rest val file env opts requires)
 
           ;; file
           (or (= opt "-f") (= opt "--file"))
-          (recur rest expr val env requires)
+          (recur rest expr val env opts requires)
 
           ;; env
           (or (= opt "-E") (= opt "--env"))
-          (recur rest expr file (edn/read-string val) requires)
+          (recur rest expr file (edn/read-string val) opts requires)
+
+          ;; DOCTYPE
+          (or (= opt "-D") (= opt "--doctype"))
+          (recur rest expr file env (assoc opts :doctype true) requires)
 
           ;; require
           (or (= opt "-r") (= opt "--require"))
-          (recur rest expr file env (conj requires val))
+          (recur rest expr file env opts (conj requires val))
 
           ;; unknown
           :else

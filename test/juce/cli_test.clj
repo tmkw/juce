@@ -43,6 +43,12 @@
       (is (= 0 exit))
       (is (= "<div>hello</div>\n" out)))))
 
+(deftest test-doctype
+  (testing "-D / --doctype"
+    (let [{:keys [out exit]} (run-cli "-D" "html" "-e" "(html (div \"hello\"))")]
+      (is (= 0 exit))
+      (is (= "<!DOCTYPE html><html><div>hello</div></html>\n" out)))))
+
 (deftest test-stdin
   (testing "stdin input"
     (let [{:keys [out exit]}
