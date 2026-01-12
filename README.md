@@ -2,6 +2,8 @@
 
 [![Clojars Project](https://img.shields.io/clojars/v/io.github.tmkw/juce.svg)](https://clojars.org/io.github.tmkw/juce)
 
+**This is an experimental project. Do not use for production level.**
+
 A small Clojure library for generating HTML using plain Clojure expressions.
 It is intended for static site or page generation, and is not suitable as a dynamic web page renderer.
 
